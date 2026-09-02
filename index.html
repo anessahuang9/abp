@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aesthetic Budget Property</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --white:#FFFFFF;
+    --paper:#F7F6F0;
+    --green-deep:#243F2E;
+    --green-mid:#3F6650;
+    --green-soft:#E1E9E0;
+    --terracotta:#BC5A38;
+    --terracotta-soft:#EBCBB6;
+    --ink:#1C221D;
+    --ink-soft:#5B655B;
+    --line:#D9D4C6;
+    --occupied:#C7BFAE;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:16px;
+    line-height:1.55;
+  }
+  h1,h2,h3,h4{
+    font-family:'Fraunces', serif;
+    color:var(--green-deep);
+    margin:0;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  a{color:inherit;}
+  button{font-family:inherit;cursor:pointer;}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 24px;}
+
+  /* NAV */
+  .nav{
+    position:sticky;top:0;z-index:40;
+    background:rgba(247,246,240,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{
+    max-width:1040px;margin:0 auto;padding:14px 24px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .brand{display:flex;flex-direction:column;line-height:1.1;}
+  .brand-name{font-family:'Fraunces',serif;font-size:19px;font-weight:600;color:var(--green-deep);}
+  .brand-sub{font-size:11.5px;color:var(--terracotta);margin-top:2px;}
+  .nav-links{display:none;gap:22px;font-size:14.5px;}
+  .nav-links a{text-decoration:none;color:var(--ink-soft);}
+  .nav-links a:hover{color:var(--green-deep);}
+  .nav-cta{
+    background:var(--green-deep);color:var(--white);border:none;
+    padding:9px 16px;border-radius:3px;font-size:14px;font-weight:500;
+    white-space:nowrap;
+  }
+  @media(min-width:760px){.nav-links{display:flex;}}
+
+  /* HERO */
+  .hero{padding:40px 0 8px;}
+  .hero-eyebrow{color:var(--terracotta);font-size:14px;margin-bottom:10px;}
+  .hero h1{font-size:clamp(30px,5.5vw,44px);line-height:1.12;max-width:12ch;}
+  .hero p.lede{max-width:46ch;color:var(--ink-soft);font-size:16.5px;margin-top:14px;}
+  .hero-stats{display:flex;gap:26px;margin-top:26px;flex-wrap:wrap;}
+  .stat b{display:block;font-family:'Fraunces',serif;font-size:26px;color:var(--green-deep);}
+  .stat span{font-size:12.5px;color:var(--ink-soft);}
+
+  /* LEGEND / FILTER BAR */
+  .rooms-head{
+    display:flex;align-items:flex-end;justify-content:space-between;
+    gap:16px;flex-wrap:wrap;margin:0 0 16px;
+  }
+  .rooms-head h2{font-size:24px;}
+  .legend{display:flex;gap:16px;font-size:13px;color:var(--ink-soft);align-items:center;}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px;}
+  .dot.avail{background:var(--green-mid);}
+  .dot.occ{background:var(--occupied);}
+
+  .floor-tabs{display:flex;gap:8px;margin-bottom:18px;}
+  .floor-tab{
+    border:1px solid var(--line);background:var(--white);
+    padding:7px 14px;border-radius:20px;font-size:13.5px;color:var(--ink-soft);
+  }
+  .floor-tab.active{background:var(--green-deep);border-color:var(--green-deep);color:var(--white);}
+
+  /* ROOM GRID - door shaped cards */
+  .room-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));
+    gap:10px;
+  }
+  .room-door{
+    border:1px solid var(--line);
+    border-top-left-radius:22px;border-top-right-radius:22px;
+    border-bottom-left-radius:4px;border-bottom-right-radius:4px;
+    background:var(--white);
+    padding:14px 6px 10px;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .room-door:hover{transform:translateY(-2px);}
+  .room-door.avail{border-color:var(--green-mid);}
+  .room-door.occ{opacity:0.62;}
+  .room-door .knob{width:6px;height:6px;border-radius:50%;background:var(--ink-soft);}
+  .room-door .num{font-family:'Fraunces',serif;font-weight:600;font-size:15px;color:var(--green-deep);}
+  .room-door .st{font-size:10.5px;color:var(--ink-soft);}
+  .room-door.selected{box-shadow:0 0 0 2px var(--terracotta);}
+
+  /* ROOM DETAIL PANEL */
+  .detail{
+    margin-top:18px;border:1px solid var(--line);background:var(--white);
+    border-radius:4px;padding:22px;display:none;
+  }
+  .detail.open{display:block;}
+  .detail-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+  .detail-top h3{font-size:22px;}
+  .badge{
+    font-size:11.5px;padding:4px 10px;border-radius:20px;
+    border:1px solid var(--line);color:var(--ink-soft);
+  }
+  .badge.avail{color:var(--green-mid);border-color:var(--green-mid);}
+  .badge.occ{color:var(--ink-soft);}
+  .detail-meta{display:flex;gap:22px;margin:14px 0;flex-wrap:wrap;font-size:14px;color:var(--ink-soft);}
+  .detail-meta b{color:var(--ink);display:block;font-size:15px;}
+  .detail-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+
+  .btn{
+    border:none;padding:10px 16px;border-radius:3px;font-size:14px;font-weight:500;
+  }
+  .btn-primary{background:var(--terracotta);color:var(--white);}
+  .btn-secondary{background:var(--green-soft);color:var(--green-deep);}
+  .btn-outline{background:transparent;border:1px solid var(--line);color:var(--ink);}
+  .btn:disabled{opacity:0.5;cursor:default;}
+
+  /* FACILITIES */
+  .facilities{margin-top:40px;}
+  .facilities h3{font-size:17px;margin-bottom:14px;}
+  .facility-grid{display:grid;grid-template-columns:1fr;gap:8px;}
+  @media(min-width:600px){.facility-grid{grid-template-columns:1fr 1fr;}}
+  .facility-item{
+    display:flex;align-items:flex-start;gap:9px;font-size:14px;color:var(--ink);
+    border:1px solid var(--line);background:var(--white);border-radius:3px;padding:10px 12px;
+  }
+  .facility-item .fdot{width:6px;height:6px;border-radius:50%;background:var(--terracotta);margin-top:7px;flex-shrink:0;}
+
+  /* VIEWS */
+  .view{display:none;}
+  .view.active{display:block;}
+  .view-inner{padding-top:28px;}
+  .back-link{
+    display:inline-flex;align-items:center;gap:6px;background:none;border:none;
+    color:var(--ink-soft);font-size:13.5px;padding:0;margin-bottom:22px;
+  }
+  .back-link:hover{color:var(--green-deep);}
+
+  /* MENU (landing) */
+  .menu-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:34px;}
+  @media(min-width:700px){.menu-grid{grid-template-columns:repeat(3,1fr);}}
+  .menu-card{
+    border:1px solid var(--line);background:var(--white);padding:24px 20px;border-radius:4px;
+    display:flex;flex-direction:column;gap:10px;text-align:left;width:100%;
+    transition:transform .12s ease, border-color .12s ease;
+  }
+  .menu-card:hover{transform:translateY(-2px);border-color:var(--green-mid);}
+  .menu-card h4{font-size:17px;}
+  .menu-card p{font-size:14px;color:var(--ink-soft);margin:0;flex:1;}
+  .menu-mark{width:34px;height:34px;border-radius:50%;background:var(--green-soft);
+    display:flex;align-items:center;justify-content:center;color:var(--green-deep);font-family:'Fraunces',serif;font-size:15px;}
+  .menu-arrow{font-size:13px;color:var(--terracotta);}
+
+  /* TERMS */
+  .terms h2{font-size:24px;margin-bottom:18px;}
+  .term-item{border-bottom:1px solid var(--line);}
+  .term-q{
+    width:100%;background:none;border:none;text-align:left;padding:16px 4px;
+    display:flex;justify-content:space-between;align-items:center;font-size:15.5px;color:var(--ink);
+    font-weight:500;
+  }
+  .term-q .plus{color:var(--terracotta);font-size:18px;transition:transform .15s;}
+  .term-a{max-height:0;overflow:hidden;transition:max-height .2s ease;font-size:14.5px;color:var(--ink-soft);}
+  .term-a-inner{padding:0 4px 16px;max-width:64ch;}
+  .term-item.open .plus{transform:rotate(45deg);}
+
+  /* PAYMENT */
+  .payment{padding-bottom:70px;}
+  .payment h2{font-size:24px;margin-bottom:6px;}
+  .payment p.sub{color:var(--ink-soft);max-width:52ch;margin-bottom:24px;}
+  .pay-grid{display:grid;grid-template-columns:1fr;gap:28px;}
+  @media(min-width:760px){.pay-grid{grid-template-columns:1.1fr 0.9fr;}}
+  .form{border:1px solid var(--line);background:var(--white);border-radius:4px;padding:22px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:13px;color:var(--ink-soft);margin-bottom:5px;}
+  .field input,.field select,.field textarea{
+    width:100%;border:1px solid var(--line);border-radius:3px;padding:9px 11px;
+    font-family:inherit;font-size:14.5px;background:var(--paper);color:var(--ink);
+  }
+  .field textarea{resize:vertical;min-height:70px;}
+  .file-drop{
+    border:1.5px dashed var(--line);border-radius:4px;padding:18px;text-align:center;
+    font-size:13.5px;color:var(--ink-soft);background:var(--paper);
+  }
+  .file-drop.has-file{border-color:var(--green-mid);color:var(--green-deep);}
+  .submissions{display:flex;flex-direction:column;gap:10px;}
+  .sub-card{border:1px solid var(--line);background:var(--white);border-radius:4px;padding:14px;display:flex;gap:12px;}
+  .sub-card img{width:52px;height:52px;object-fit:cover;border-radius:3px;border:1px solid var(--line);}
+  .sub-meta b{display:block;font-size:14px;}
+  .sub-meta span{font-size:12px;color:var(--ink-soft);}
+  .sub-status{margin-left:auto;font-size:11px;color:var(--terracotta);align-self:flex-start;white-space:nowrap;}
+  .empty{font-size:13.5px;color:var(--ink-soft);border:1px dashed var(--line);border-radius:4px;padding:18px;text-align:center;}
+  .reset-link{font-size:12px;color:var(--ink-soft);text-decoration:underline;background:none;border:none;padding:0;margin-top:10px;}
+
+  /* FOOTER */
+  footer{border-top:1px solid var(--line);margin-top:20px;padding:30px 0 40px;}
+  .foot-inner{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--ink-soft);}
+  .foot-inner b{color:var(--green-deep);}
+
+  /* MODAL */
+  .overlay{
+    position:fixed;inset:0;background:rgba(28,34,29,0.5);display:none;
+    align-items:flex-end;justify-content:center;z-index:100;
+  }
+  .overlay.open{display:flex;}
+  @media(min-width:640px){.overlay{align-items:center;}}
+  .modal{
+    background:var(--white);width:100%;max-width:480px;border-radius:8px 8px 0 0;
+    padding:24px;max-height:90vh;overflow-y:auto;
+  }
+  @media(min-width:640px){.modal{border-radius:8px;}}
+  .modal-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+  .modal-head h3{font-size:19px;}
+  .close-x{background:none;border:none;font-size:20px;color:var(--ink-soft);line-height:1;padding:4px;}
+  .req-type-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .pill{border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:12.5px;color:var(--ink-soft);background:var(--paper);}
+  .pill.active{background:var(--green-deep);color:var(--white);border-color:var(--green-deep);}
+
+  /* TOAST */
+  .toast{
+    position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--green-deep);color:var(--white);padding:13px 20px;border-radius:5px;
+    font-size:14px;opacity:0;transition:all .25s ease;z-index:200;box-shadow:0 6px 20px rgba(0,0,0,0.18);
+    max-width:88vw;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .loading-note{font-size:13px;color:var(--ink-soft);padding:10px 0;}
+  .section-divider{height:1px;background:var(--line);margin:60px 0 0;}
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+  :focus-visible{outline:2px solid var(--terracotta);outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-inner">
+    <button class="brand" onclick="showView('menu')" style="background:none;border:none;text-align:left;padding:0;">
+      <span class="brand-name">Aesthetic Budget Property</span>
+    </button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- MENU VIEW -->
+  <section class="view active" id="view-menu">
+    <div class="view-inner" style="padding-top:40px;">
+      <div class="hero-eyebrow">Kamar sewa · bulanan</div>
+      <h1>Kamar sederhana, dikelola dengan baik, harga bersahabat.</h1>
+      <div class="hero-stats">
+        <div class="stat"><b id="stat-avail">–</b><span>tersedia sekarang</span></div>
+      </div>
+
+      <div class="menu-grid">
+        <button class="menu-card" onclick="showView('rooms')">
+          <h4>Cek ketersediaan kamar</h4>
+        </button>
+        <button class="menu-card" onclick="showView('terms')">
+          <h4>Baca syarat &amp; ketentuan</h4>
+        </button>
+        <button class="menu-card" onclick="showView('payment')">
+          <h4>Upload bukti pembayaran</h4>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROOMS VIEW -->
+  <section class="view" id="view-rooms">
+    <div class="view-inner">
+      <button class="back-link" onclick="showView('menu')">← Kembali ke menu</button>
+      <div class="rooms-head">
+        <h2>Ketersediaan kamar</h2>
+        <div class="legend">
+          <span><span class="dot avail"></span>Tersedia</span>
+          <span><span class="dot occ"></span>Terisi</span>
+        </div>
+      </div>
+
+      <div class="floor-tabs" id="floor-tabs">
+        <button class="floor-tab active" data-floor="1">Lantai 1</button>
+        <button class="floor-tab" data-floor="2">Lantai 2</button>
+      </div>
+
+      <div id="room-grid" class="room-grid">
+        <p class="loading-note">Memuat status kamar…</p>
+      </div>
+
+      <div class="detail" id="detail-panel"></div>
+
+      <div class="facilities">
+        <h3>Fasilitas</h3>
+        <div class="facility-grid">
+          <div class="facility-item"><span class="fdot"></span>WiFi</div>
+          <div class="facility-item"><span class="fdot"></span>Parkir motor</div>
+          <div class="facility-item"><span class="fdot"></span>Kamar mandi luar</div>
+          <div class="facility-item"><span class="fdot"></span>CCTV 24 jam</div>
+          <div class="facility-item"><span class="fdot"></span>Double akses kartu dan password</div>
+          <div class="facility-item"><span class="fdot"></span>Kasur, keset, tempat sepatu, sendal</div>
+          <div class="facility-item"><span class="fdot"></span>Lemari pakaian</div>
+          <div class="facility-item"><span class="fdot"></span>Kursi dan meja belajar</div>
+          <div class="facility-item"><span class="fdot"></span>Dapur bersama</div>
+          <div class="facility-item"><span class="fdot"></span>Laundry bersama</div>
+          <div class="facility-item"><span class="fdot"></span>Tempat makan bersama</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TERMS VIEW -->
+  <section class="view" id="view-terms">
+    <div class="view-inner">
+      <button class="back-link" onclick="showView('menu')">← Kembali ke menu</button>
+      <div class="terms">
+        <h2>Syarat &amp; ketentuan</h2>
+        <div id="terms-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAYMENT VIEW -->
+  <section class="view" id="view-payment">
+    <div class="view-inner">
+      <button class="back-link" onclick="showView('menu')">← Kembali ke menu</button>
+      <div class="payment">
+        <h2>Upload bukti pembayaran</h2>
+        <div class="pay-grid">
+          <form class="form" id="payment-form">
+            <div class="field">
+              <label for="pf-ref">Nomor kamar</label>
+              <select id="pf-ref" required>
+                <option value="" disabled selected>Pilih nomor kamar</option>
+                <option>0</option>
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+                <option>6</option>
+                <option>7</option>
+                <option>8</option>
+                <option>9</option>
+                <option>10</option>
+                <option>11</option>
+                <option>12</option>
+                <option>13</option>
+                <option>14</option>
+                <option>15</option>
+                <option>16</option>
+                <option>17</option>
+                <option>18</option>
+                <option>19</option>
+                <option>20</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="pf-period">Bulan</label>
+              <select id="pf-period" required>
+                <option value="" disabled selected>Pilih bulan</option>
+                <option>Januari</option>
+                <option>Februari</option>
+                <option>Maret</option>
+                <option>April</option>
+                <option>Mei</option>
+                <option>Juni</option>
+                <option>Juli</option>
+                <option>Agustus</option>
+                <option>September</option>
+                <option>Oktober</option>
+                <option>November</option>
+                <option>Desember</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="pf-file">Upload screenshot (gambar, di bawah 3MB)</label>
+              <div class="file-drop" id="file-drop">Ketuk untuk memilih screenshot atau foto bukti transfer</div>
+              <input id="pf-file" type="file" accept="image/*" class="visually-hidden">
+            </div>
+            <button type="submit" class="btn btn-primary" id="pf-submit">Kirim bukti pembayaran</button>
+          </form>
+
+          <div>
+            <div id="submissions" class="submissions">
+              <p class="loading-note">Memuat riwayat unggahan Anda…</p>
+            </div>
+            <button class="reset-link" id="reset-submissions" style="display:none;">Hapus unggahan saya dari perangkat ini</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Inquiry Modal -->
+<div class="overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-title">Ajukan pertanyaan</h3>
+      <button class="close-x" onclick="closeModal()" aria-label="Tutup">&times;</button>
+    </div>
+    <div class="req-type-pills" id="req-pills">
+      <button type="button" class="pill" data-type="survey">Survey</button>
+      <button type="button" class="pill" data-type="booking">Booking / check in</button>
+      <button type="button" class="pill" data-type="checkout">Check out</button>
+      <button type="button" class="pill" data-type="general">Lainnya</button>
+    </div>
+    <form id="inquiry-form">
+      <div class="field">
+        <label for="iq-room">Kamar (jika relevan)</label>
+        <input id="iq-room" type="text" placeholder="contoh: 204">
+      </div>
+      <div class="field">
+        <label for="iq-name">Nama Anda</label>
+        <input id="iq-name" type="text" required>
+      </div>
+      <div class="field">
+        <label for="iq-contact">Nomor HP / WhatsApp</label>
+        <input id="iq-contact" type="text" required>
+      </div>
+      <div class="field">
+        <label for="iq-date">Tanggal yang diinginkan</label>
+        <input id="iq-date" type="date">
+      </div>
+      <div class="field">
+        <label for="iq-msg">Pesan</label>
+        <textarea id="iq-msg" placeholder="Ada hal khusus yang perlu kami tahu"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" id="iq-submit" style="width:100%;">Kirim permintaan</button>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- Data ---------- */
+function buildDefaultRooms(){
+  const rooms = [];
+  const floor1Status = [1,0,1,1,0,1,1,0,1,1]; // 1 = available
+  const floor2Status = [0,1,1,1,0,1,1,1,0,1];
+  floor1Status.forEach((s,i)=>{
+    rooms.push({id:'10'+(i+1), floor:1, number:'10'+(i+1), status:s?'available':'occupied', price:'Rp 750.000 / bulan', size:'3 x 4 m'});
+  });
+  floor2Status.forEach((s,i)=>{
+    rooms.push({id:'20'+(i+1), floor:2, number:'20'+(i+1), status:s?'available':'occupied', price:'Rp 750.000 / bulan', size:'3 x 4 m'});
+  });
+  return rooms;
+}
+
+const TERMS = [
+  {q:'Booking & deposit', a:'Kamar baru ditahan setelah kami menerima deposit booking sebesar satu bulan sewa. Deposit ini terpisah dari sewa bulan pertama dan akan dikembalikan saat check-out, dikurangi biaya kerusakan atau tagihan yang belum dibayar.'},
+  {q:'Ketentuan pembayaran', a:'Sewa dibayarkan paling lambat tanggal 5 setiap bulan melalui transfer bank. Silakan upload bukti pembayaran di situs ini agar kami dapat mengonfirmasinya sesuai kamar Anda. Pembayaran yang belum dikonfirmasi dalam 7 hari sejak jatuh tempo dapat dianggap terlambat.'},
+  {q:'Peraturan rumah', a:'Jam tenang berlaku pukul 22.00–06.00. Tamu menginap harus didaftarkan kepada kami terlebih dahulu. Merokok hanya diperbolehkan di area luar yang telah ditentukan. Memasak hanya boleh dilakukan di dapur bersama, bukan di dalam kamar masing-masing.'},
+  {q:'Prosedur check-in', a:'Pada hari check-in, kami akan memeriksa kondisi kamar bersama Anda, mencatat kondisinya, lalu menyerahkan kunci dan kartu akses. Mohon membawa identitas yang berlaku untuk data kami.'},
+  {q:'Check-out & masa pemberitahuan', a:'Kami meminta pemberitahuan tertulis minimal 30 hari sebelum Anda pindah keluar. Gunakan permintaan check-out di situs ini untuk memulai prosesnya. Kami akan menjadwalkan pemeriksaan kondisi kamar sebelum deposit dikembalikan.'},
+  {q:'Pembatalan & pengembalian dana', a:'Jika pembatalan dilakukan lebih dari 7 hari sebelum tanggal check-in, deposit dikembalikan penuh. Pembatalan dalam 7 hari sebelum check-in akan dikenakan potongan 50% dari deposit sebagai biaya penahanan kamar.'},
+  {q:'Kerusakan & deposit keamanan', a:'Keausan wajar akibat pemakaian normal tidak akan dipotong. Kerusakan di luar pemakaian normal, perlengkapan yang hilang, atau tagihan yang belum dibayar akan dipotong dari deposit sebelum sisanya dikembalikan, biasanya dalam 14 hari setelah check-out.'}
+];
+
+let rooms = [];
+let currentFloor = '1';
+let selectedRoomId = null;
+let currentReqType = 'general';
+
+/* ---------- View switching ---------- */
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  window.scrollTo({top:0, behavior:'instant'});
+}
+
+/* ---------- Storage helpers ---------- */
+async function loadRooms(){
+  try{
+    const res = await window.storage.get('abp-rooms', true);
+    if(res && res.value){
+      rooms = JSON.parse(res.value);
+    } else {
+      rooms = buildDefaultRooms();
+      await window.storage.set('abp-rooms', JSON.stringify(rooms), true);
+    }
+  }catch(e){
+    rooms = buildDefaultRooms();
+  }
+  renderRoomGrid();
+  renderStats();
+}
+
+async function loadSubmissions(){
+  const el = document.getElementById('submissions');
+  try{
+    const res = await window.storage.get('abp-payments', false);
+    const list = res && res.value ? JSON.parse(res.value) : [];
+    renderSubmissions(list);
+  }catch(e){
+    renderSubmissions([]);
+  }
+}
+
+async function saveSubmission(entry){
+  let list = [];
+  try{
+    const res = await window.storage.get('abp-payments', false);
+    list = res && res.value ? JSON.parse(res.value) : [];
+  }catch(e){ list = []; }
+  list.unshift(entry);
+  await window.storage.set('abp-payments', JSON.stringify(list), false);
+  renderSubmissions(list);
+}
+
+async function saveInquiry(entry){
+  let list = [];
+  try{
+    const res = await window.storage.get('abp-inquiries', false);
+    list = res && res.value ? JSON.parse(res.value) : [];
+  }catch(e){ list = []; }
+  list.unshift(entry);
+  await window.storage.set('abp-inquiries', JSON.stringify(list), false);
+}
+
+/* ---------- Render: rooms ---------- */
+function renderStats(){
+  const availCount = rooms.filter(r=>r.status==='available').length;
+  document.getElementById('stat-avail').textContent = availCount;
+}
+
+function renderRoomGrid(){
+  const grid = document.getElementById('room-grid');
+  const filtered = currentFloor === 'all' ? rooms : rooms.filter(r=>String(r.floor)===String(currentFloor));
+  grid.innerHTML = '';
+  filtered.forEach(r=>{
+    const div = document.createElement('button');
+    div.className = 'room-door ' + r.status + (r.id===selectedRoomId ? ' selected':'');
+    div.setAttribute('aria-label', 'Kamar '+r.number+', '+r.status);
+    div.innerHTML = '<span class="knob"></span><span class="num">'+r.number+'</span><span class="st">'+(r.status==='available'?'Kosong':'Terisi')+'</span>';
+    div.onclick = ()=> selectRoom(r.id);
+    grid.appendChild(div);
+  });
+}
+
+function selectRoom(id){
+  selectedRoomId = id;
+  renderRoomGrid();
+  const room = rooms.find(r=>r.id===id);
+  const panel = document.getElementById('detail-panel');
+  if(!room){ panel.classList.remove('open'); return; }
+  panel.classList.add('open');
+  panel.innerHTML = `
+    <div class="detail-top">
+      <h3>Kamar ${room.number}</h3>
+      <span class="badge ${room.status}">${room.status==='available' ? 'Tersedia sekarang' : 'Sedang terisi'}</span>
+    </div>
+    <div class="detail-meta">
+      <div><b>${room.price}</b>sewa</div>
+    </div>
+    <div class="detail-actions">
+      <a class="btn btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;${room.status!=='available'?'opacity:0.5;pointer-events:none;':''}" href="https://wa.me/628984831124?text=${encodeURIComponent('Halo, saya ingin survey dan booking kamar '+room.number+' di Aesthetic Budget Property.')}" target="_blank" rel="noopener">Survey &amp; booking</a>
+    </div>
+  `;
+  panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+document.getElementById('floor-tabs').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.floor-tab');
+  if(!btn) return;
+  document.querySelectorAll('.floor-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFloor = btn.dataset.floor;
+  renderRoomGrid();
+});
+
+/* ---------- Render: terms ---------- */
+function renderTerms(){
+  const list = document.getElementById('terms-list');
+  list.innerHTML = '';
+  TERMS.forEach((t,i)=>{
+    const item = document.createElement('div');
+    item.className = 'term-item';
+    item.innerHTML = `
+      <button type="button" class="term-q">${t.q}<span class="plus">+</span></button>
+      <div class="term-a"><div class="term-a-inner">${t.a}</div></div>
+    `;
+    const q = item.querySelector('.term-q');
+    const a = item.querySelector('.term-a');
+    q.addEventListener('click', ()=>{
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.term-item').forEach(other=>{
+        other.classList.remove('open');
+        other.querySelector('.term-a').style.maxHeight = null;
+      });
+      if(!isOpen){
+        item.classList.add('open');
+        a.style.maxHeight = a.scrollHeight + 'px';
+      }
+    });
+    list.appendChild(item);
+  });
+}
+
+/* ---------- Render: submissions ---------- */
+function renderSubmissions(list){
+  const el = document.getElementById('submissions');
+  const resetBtn = document.getElementById('reset-submissions');
+  if(!list || list.length === 0){
+    el.innerHTML = '<div class="empty">Belum ada bukti pembayaran yang diunggah dari perangkat ini.</div>';
+    resetBtn.style.display = 'none';
+    return;
+  }
+  resetBtn.style.display = 'inline-block';
+  el.innerHTML = '';
+  list.forEach(item=>{
+    const card = document.createElement('div');
+    card.className = 'sub-card';
+    card.innerHTML = `
+      ${item.image ? `<img src="${item.image}" alt="Bukti pembayaran kamar ${item.ref}">` : ''}
+      <div class="sub-meta">
+        <b>Kamar ${item.ref}</b>
+        <span>${item.period}</span>
+        <span>${new Date(item.date).toLocaleDateString('id-ID')}</span>
+      </div>
+      <div class="sub-status">Menunggu verifikasi</div>
+    `;
+    el.appendChild(card);
+  });
+}
+
+/* ---------- Modal / inquiry ---------- */
+function openModal(type, roomNumber){
+  currentReqType = type || 'general';
+  document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('active', p.dataset.type===currentReqType));
+  const titles = {survey:'Ajukan survey', booking:'Ajukan booking / check in', checkout:'Ajukan check out', general:'Ajukan pertanyaan'};
+  document.getElementById('modal-title').textContent = titles[currentReqType] || 'Ajukan pertanyaan';
+  document.getElementById('iq-room').value = roomNumber || '';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(){
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+document.getElementById('modal-overlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'modal-overlay') closeModal();
+});
+document.getElementById('req-pills').addEventListener('click', (e)=>{
+  const p = e.target.closest('.pill');
+  if(!p) return;
+  currentReqType = p.dataset.type;
+  document.querySelectorAll('.pill').forEach(x=>x.classList.toggle('active', x===p));
+  const titles = {survey:'Ajukan survey', booking:'Ajukan booking / check in', checkout:'Ajukan check out', general:'Ajukan pertanyaan'};
+  document.getElementById('modal-title').textContent = titles[currentReqType];
+});
+
+document.getElementById('inquiry-form').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const btn = document.getElementById('iq-submit');
+  btn.disabled = true;
+  btn.textContent = 'Mengirim…';
+  const entry = {
+    type: currentReqType,
+    room: document.getElementById('iq-room').value.trim(),
+    name: document.getElementById('iq-name').value.trim(),
+    contact: document.getElementById('iq-contact').value.trim(),
+    date: document.getElementById('iq-date').value,
+    message: document.getElementById('iq-msg').value.trim(),
+    submittedAt: new Date().toISOString()
+  };
+  try{
+    await saveInquiry(entry);
+    showToast('Permintaan terkirim. Kami akan membalas dalam 1 hari kerja.');
+    e.target.reset();
+    closeModal();
+  }catch(err){
+    showToast('Gagal mengirim — silakan coba lagi.');
+  }
+  btn.disabled = false;
+  btn.textContent = 'Kirim permintaan';
+});
+
+/* ---------- Payment form ---------- */
+const fileInput = document.getElementById('pf-file');
+const fileDrop = document.getElementById('file-drop');
+let selectedFileData = null;
+
+fileDrop.addEventListener('click', ()=> fileInput.click());
+fileInput.addEventListener('change', ()=>{
+  const file = fileInput.files[0];
+  if(!file) return;
+  if(file.size > 3.2 * 1024 * 1024){
+    showToast('Ukuran gambar terlalu besar — gunakan file di bawah 3MB.');
+    fileInput.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    selectedFileData = reader.result;
+    fileDrop.textContent = 'Terpilih: ' + file.name;
+    fileDrop.classList.add('has-file');
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('payment-form').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const btn = document.getElementById('pf-submit');
+  btn.disabled = true;
+  btn.textContent = 'Mengunggah…';
+  const entry = {
+    ref: document.getElementById('pf-ref').value.trim(),
+    period: document.getElementById('pf-period').value,
+    image: selectedFileData,
+    date: new Date().toISOString()
+  };
+  try{
+    await saveSubmission(entry);
+    showToast('Bukti pembayaran diterima — akan segera kami konfirmasi.');
+    e.target.reset();
+    fileDrop.textContent = 'Ketuk untuk memilih screenshot atau foto bukti transfer';
+    fileDrop.classList.remove('has-file');
+    selectedFileData = null;
+  }catch(err){
+    showToast('Gagal mengunggah — silakan coba lagi.');
+  }
+  btn.disabled = false;
+  btn.textContent = 'Kirim bukti pembayaran';
+});
+
+document.getElementById('reset-submissions').addEventListener('click', async ()=>{
+  try{
+    await window.storage.delete('abp-payments', false);
+  }catch(e){}
+  renderSubmissions([]);
+  showToast('Unggahan Anda di perangkat ini telah dihapus.');
+});
+
+/* ---------- Toast ---------- */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('show'), 3200);
+}
+
+/* ---------- Init ---------- */
+renderTerms();
+loadRooms();
+loadSubmissions();
+</script>
+
+</body>
+</html>
